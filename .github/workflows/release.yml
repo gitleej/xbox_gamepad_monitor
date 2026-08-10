@@ -63,7 +63,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME#v}"
           cd dist
           cp ../icon.ico .
-          zip -q "../xbox_gamepad_monitor-${VERSION}-windows-x86_64.zip" xbox_gamepad_monitor.exe icon.ico
+          python -m zipfile -c "../xbox_gamepad_monitor-${VERSION}-windows-x86_64.zip" xbox_gamepad_monitor.exe icon.ico
 
       - uses: actions/upload-artifact@v4
         with:
