@@ -1,0 +1,101 @@
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (${{ matrix.artifact }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: linux
+          - os: windows-latest
+            artifact: windows
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pygame pyinstaller
+
+      - name: Write version from tag
+        shell: bash
+        run: echo "${GITHUB_REF_NAME#v}" > version.txt
+
+      - name: Build with PyInstaller (Linux)
+        if: runner.os == 'Linux'
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --add-data "version.txt:." --name xbox_gamepad_monitor xbox_gamepad_monitor.py
+
+      - name: Build with PyInstaller (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: python -m PyInstaller --noconfirm --clean --onefile --windowed --icon icon.ico --add-data "version.txt;." --name xbox_gamepad_monitor xbox_gamepad_monitor.py
+
+      - name: Package (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd dist
+          cp ../icon.png ../install.sh .
+          chmod +x install.sh
+          tar -czf "../xbox_gamepad_monitor-${VERSION}-linux-x86_64.tar.gz" xbox_gamepad_monitor icon.png install.sh
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          cd dist
+          cp ../icon.ico .
+          zip -q "../xbox_gamepad_monitor-${VERSION}-windows-x86_64.zip" xbox_gamepad_monitor.exe icon.ico
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            xbox_gamepad_monitor-*.zip
+            xbox_gamepad_monitor-*.tar.gz
+
+  release:
+    name: Publish Release
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux
+          path: artifacts/linux
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: windows
+          path: artifacts/windows
+
+      - name: Show packaged files
+        run: find artifacts -type f
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            artifacts/linux/*
+            artifacts/windows/*
+          name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref }}
+          generate_release_notes: true

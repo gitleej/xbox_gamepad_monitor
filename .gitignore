@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec
+version.txt
+xbox_gamepad_mapping.json

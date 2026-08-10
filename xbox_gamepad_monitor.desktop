@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Name=Xbox Gamepad Monitor
+Name[zh_CN]=Xbox 手柄监视器
+Comment=Xbox 手柄实时状态可视化（Pygame）
+Comment[zh_CN]=Xbox 手柄实时状态可视化
+Exec=/home/tk/Documents/isaaclab/xbox_gamepad_monitor/dist/xbox_gamepad_monitor
+Icon=/home/tk/Documents/isaaclab/xbox_gamepad_monitor/icon.png
+Terminal=false
+Categories=Utility;
+StartupNotify=true
