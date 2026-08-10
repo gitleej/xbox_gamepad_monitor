@@ -66,6 +66,20 @@ python -m PyInstaller --noconfirm --clean --onefile --windowed --name xbox_gamep
 - 产物为 Linux x86-64 可执行文件（ELF），SDL 等运行库已内置，仅依赖系统基础库；
   如需在其它发行版上使用，建议在目标机器上重新打包。
 
+### 发布新版本（GitHub Actions 自动打包）
+
+仓库配置了 CI/CD：推送 `v*` 标签即自动在 Linux / Windows 两个平台构建
+无终端版可执行文件并发布到 GitHub Release：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+- 版本号取自标签（去掉 `v` 前缀），会写入程序窗口标题并用于产物命名，与 tag 同步；
+- 产物：`xbox_gamepad_monitor-<版本>-linux-x86_64.tar.gz`（含二进制、图标、安装脚本）
+  和 `xbox_gamepad_monitor-<版本>-windows-x86_64.zip`（含带图标的 exe）。
+
 ## 页面元素说明
 
 下图是界面渲染效果（示例状态：左摇杆推向右上、右摇杆推向左下、
@@ -179,9 +193,11 @@ LT 按下一半、RT 按下一小段，`LB` / `A` / `Start` / 十字键【右】
 
 ```
 xbox_gamepad_monitor/
+├── .github/workflows/
+│   └── release.yml              # CI/CD：标签推送自动打包并发布 Release
 ├── xbox_gamepad_monitor.py      # 主程序（源码）
 ├── dist/
-│   └── xbox_gamepad_monitor     # 打包好的独立可执行文件（无终端版）
+│   └── xbox_gamepad_monitor     # 本地打包的可执行文件（无终端版）
 ├── xbox_gamepad_monitor.desktop # 桌面启动文件（双击启动、带图标）
 ├── icon.png                     # 应用图标（桌面用）
 ├── icon.ico                     # 多尺寸图标（其它平台打包用）
