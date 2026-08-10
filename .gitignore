@@ -5,3 +5,4 @@ dist/
 *.spec
 version.txt
 xbox_gamepad_mapping.json
+.vscode/
